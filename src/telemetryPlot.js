@@ -41,4 +41,5 @@ class Telemetry extends Component {
   }
 
 }
+
 export default Telemetry;
