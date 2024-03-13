@@ -7,7 +7,7 @@ class Telemetry extends Component {
     super(props);
 
     this.state = initialState();
-
+    console.log("Hello!")
     setInterval(() => {
       fetch('http://localhost:3000/TelemetryData.json',{cache: "reload"})
       .then(response => {
