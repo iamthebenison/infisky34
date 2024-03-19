@@ -79,7 +79,7 @@ const parseJSON = (state, packets) => {
   });
   return Object.freeze(
     newPackets.reduce(
-    (intermediateState,newPacket) => parseData(intermediateState,newPacket),
+    (intermediateState,newPacket) => parseData(intermediateState, newPacket),
     {...state}
   ));
 }

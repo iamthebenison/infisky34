@@ -1,59 +1,83 @@
-import React, { Component } from 'react';
+import React , { Component } from 'react';
 import { Mission1 } from './components';
 import { initialState, parseJSON } from './lib';
 
-class Telemetry extends Component {
+class TelemetryData extends Component {
   constructor(props) {
     super(props);
 
     this.state = initialState();
-    this.timerId = null;
+    this.prevState = initialState();
+    this.i = 1; // Initialize counter
+    this.fetchData(); // Start fetching data
   }
 
-  startMission = () => {
-    // Stop any ongoing mission first
-    this.stopMission();
+  componentDidMount() {
+    this.interval = setInterval(() => {
+      this.fetchData(); // Fetch data periodically
+    }, 1000);
+  }
 
-    let currentIndex = 0;
-    const data = [];
+  componentWillUnmount() {
+    clearInterval(this.interval); // Clear interval when component unmounts
+  }
 
-    // Fetch data from TelemetryData.json periodically
-    this.timerId = setInterval(() => {
-      fetch('http://localhost:3000/TelemetryData.json', { cache: "reload" })
-        .then(response => response.json())
-        .then(telemetryData => {
-          if (currentIndex < telemetryData.length) {
-            // Parse and update the state with the current data point
-            const parsedData = parseJSON(this.state, telemetryData[currentIndex]);
-            this.setState(parsedData);
-            currentIndex++;
-          } else {
-            // If all data points have been fetched, stop the mission
-            this.stopMission();
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching telemetry data:', error);
-          // If an error occurs, stop the mission
-          this.stopMission();
-        });
-    }, 2000); // Fetch data every 2 seconds
-};
+  fetchData() {
+    let url = 'telDat' + this.i + '.json'; // Construct URL with current counter
+    console.log(url);
+    fetch('http://localhost:3000/dta/' + url, { cache: "reload" })
+      .then(response => {
+        try {
+          return response.json();
+        } catch (e) {
+          return Promise.reject();
+        }
+      })
+      .then(telemetryData => {
+        this.setState(parseJSON(this.state, telemetryData));
+        this.i++; // Increment counter
+        console.log('Next URL: telDat' + this.i + '.json');
+      })
+      .catch(() => {});
+  }
 
-
-  stopMission = () => {
-    // Stop the mission by clearing the interval
-    clearInterval(this.timerId);
-  };
+  changePlots(state, plots) {
+    this.setState(
+      Object.freeze({
+        ...state,
+        plotsToRender: plots
+      })
+    );
+  }
 
   render() {
     return (
       <div id="plots">
-        <button onClick={this.startMission}>Start Mission</button>
         <Mission1 state={this.state} />
       </div>
     );
   }
 }
 
-export default Telemetry;
+export default TelemetryData;
+
+
+//   changePlots(state,plots){
+//     this.setState(
+//       Object.freeze({
+//       ...state,
+//       plotsToRender : plots
+//     })
+//   );
+//   }
+  
+//   render() {
+//     return (
+//       <div id="plots">
+//           <Mission1 state={this.state}/>
+//       </div>
+//     );
+//   }
+// }
+
+// export default TelemetryData;
